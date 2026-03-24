@@ -89,7 +89,15 @@ function parseModelJson(raw: string): unknown | null {
 }
 
 function sanitizeText(value: string) {
-  return value.replace(/—/g, "-").trim()
+  const withoutDashSeparators = value
+    .replace(/[—–]/g, ", ")
+    .replace(/\s-\s/g, ", ")
+    .replace(/^\s*-\s+/gm, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+,/g, ",")
+    .trim()
+
+  return withoutDashSeparators
 }
 
 function sanitizeOutput(data: z.infer<typeof OutputSchema>): z.infer<typeof OutputSchema> {
