@@ -218,7 +218,7 @@ export default function IdeaValidationForm() {
               <Lightbulb className="h-4 w-4" />
               Idea Validation
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Pitch Your Half-Baked Idea</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Pitch Your Idea to Northside</h1>
             <p className="mt-2 text-muted-foreground">
               Drop your concept in the chatbox, then we&apos;ll generate the full validation framework.
             </p>
@@ -310,7 +310,7 @@ export default function IdeaValidationForm() {
             label="Key Risks"
             sublabel="Brutal honesty about what could go wrong"
           >
-            <ul className="list-disc space-y-2 pl-5 text-foreground">
+            <ul className="list-disc space-y-2 pl-5 text-sm text-foreground">
               {formData.keyRisks.map((risk, index) => (
                 <li key={`risk-${index}`}>{risk}</li>
               ))}
@@ -322,7 +322,7 @@ export default function IdeaValidationForm() {
             label="Next Steps"
             sublabel="Practical and immediate actions to validate the idea"
           >
-            <ol className="list-decimal space-y-2 pl-5 text-foreground">
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-foreground">
               {formData.nextSteps.map((step, index) => (
                 <li key={`step-${index}`}>{step}</li>
               ))}
