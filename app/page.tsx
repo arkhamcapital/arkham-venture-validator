@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Send, Lightbulb, Target, TrendingUp, AlertTriangle, ListChecks, Gauge } from "lucide-react"
+import { Send, Lightbulb, Target, TrendingUp, AlertTriangle, ListChecks, Gauge, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 
 interface FormData {
@@ -25,6 +24,8 @@ interface ChatBubbleProps {
   children: React.ReactNode
   isLast?: boolean
 }
+
+const AUTH_SESSION_KEY = "venturevalidator_authenticated_v2"
 
 function ChatBubble({ icon, label, sublabel, children, isLast }: ChatBubbleProps) {
   return (
@@ -69,11 +70,8 @@ export default function IdeaValidationForm() {
     clarityExplanation: "",
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-
   useEffect(() => {
-    const existingSession = window.localStorage.getItem("venturevalidator_authenticated")
+    const existingSession = window.localStorage.getItem(AUTH_SESSION_KEY)
     setIsAuthenticated(existingSession === "true")
     setAuthChecked(true)
   }, [])
@@ -96,7 +94,7 @@ export default function IdeaValidationForm() {
         return
       }
 
-      window.localStorage.setItem("venturevalidator_authenticated", "true")
+      window.localStorage.setItem(AUTH_SESSION_KEY, "true")
       setIsAuthenticated(true)
       setUsername("")
       setPassword("")
@@ -147,21 +145,12 @@ export default function IdeaValidationForm() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+  const handleSignOut = () => {
+    window.localStorage.removeItem(AUTH_SESSION_KEY)
+    setIsAuthenticated(false)
+    setHasSubmittedIdeaPrompt(false)
+    setIdeaPrompt("")
   }
-
-  const isFormValid =
-    formData.coreInsight.trim() &&
-    formData.wedgeMarket.trim() &&
-    formData.whyNow.trim() &&
-    formData.keyRisks.length > 0 &&
-    formData.nextSteps.length > 0 &&
-    formData.clarityExplanation.trim()
 
   if (!authChecked) {
     return null
@@ -174,7 +163,7 @@ export default function IdeaValidationForm() {
           <div className="mb-8 text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <Lightbulb className="h-4 w-4" />
-              Venture Validator
+              Northside Ventures Point of Clarity
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Login</h1>
             <p className="mt-2 text-muted-foreground">Sign in to access idea validation.</p>
@@ -224,6 +213,12 @@ export default function IdeaValidationForm() {
     return (
       <main className="min-h-screen bg-background p-4 md:p-8">
         <div className="mx-auto max-w-2xl">
+          <div className="mb-4 flex justify-end">
+            <Button onClick={handleSignOut} variant="outline" className="gap-2">
+              Sign Out
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="mb-8 text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
               <Lightbulb className="h-4 w-4" />
@@ -261,41 +256,26 @@ export default function IdeaValidationForm() {
     )
   }
 
-  if (isSubmitted) {
-    return (
-      <main className="min-h-screen bg-background p-4 md:p-8">
-        <div className="mx-auto max-w-2xl">
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-12 text-center shadow-sm">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Lightbulb className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="mb-2 text-2xl font-bold text-foreground">Validation Submitted</h2>
-            <p className="mb-6 text-muted-foreground">
-              Your idea validation has been recorded successfully.
-            </p>
-            <Button onClick={() => setIsSubmitted(false)} variant="outline">
-              Submit Another
-            </Button>
-          </div>
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main className="min-h-screen bg-background p-4 md:p-8">
       <div className="mx-auto max-w-2xl">
+        <div className="mb-4 flex justify-end">
+          <Button onClick={handleSignOut} variant="outline" className="gap-2">
+            Sign Out
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             <Lightbulb className="h-4 w-4" />
-            Idea Validation
+            Northside Ventures presents...
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Startup Idea Assessment
+            Point of Clarity
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            Complete the framework below to validate your startup concept
+          <p>
+            Your idea validation framework
           </p>
         </div>
 
@@ -310,7 +290,7 @@ export default function IdeaValidationForm() {
               placeholder="What unique insight or problem have you identified that others have missed?"
               className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
               value={formData.coreInsight}
-              onChange={(e) => updateField("coreInsight", e.target.value)}
+              readOnly
             />
           </ChatBubble>
 
@@ -323,112 +303,65 @@ export default function IdeaValidationForm() {
               placeholder="Who are your first 100 customers and why will they adopt immediately?"
               className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
               value={formData.wedgeMarket}
-              onChange={(e) => updateField("wedgeMarket", e.target.value)}
+              readOnly
             />
           </ChatBubble>
 
           <ChatBubble
             icon={<TrendingUp className="h-5 w-5" />}
             label="Why Now"
-            sublabel="Tie to AI breakthroughs, market shifts, or emerging trends"
+            sublabel="Tied to AI breakthroughs, market shifts, or emerging trends"
           >
             <Textarea
               placeholder="What has changed recently that makes this the perfect moment for this idea?"
               className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
               value={formData.whyNow}
-              onChange={(e) => updateField("whyNow", e.target.value)}
+              readOnly
             />
           </ChatBubble>
 
           <ChatBubble
             icon={<AlertTriangle className="h-5 w-5" />}
             label="Key Risks"
-            sublabel="Be brutally honest about what could go wrong"
+            sublabel="Brutal honesty about what could go wrong"
           >
-            <Textarea
-              placeholder="What are the biggest threats to this idea? What keeps you up at night?"
-              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
-                value={formData.keyRisks.join("\n")}
-                onChange={(e) =>
-                  updateField(
-                    "keyRisks",
-                    e.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean)
-                  )
-                }
-            />
+            <ul className="list-disc space-y-2 pl-5 text-foreground">
+              {formData.keyRisks.map((risk, index) => (
+                <li key={`risk-${index}`}>{risk}</li>
+              ))}
+            </ul>
           </ChatBubble>
 
           <ChatBubble
             icon={<ListChecks className="h-5 w-5" />}
-            label="Next 3 Steps"
+            label="Next Steps"
             sublabel="Practical and immediate actions to validate the idea"
           >
-            <Textarea
-              placeholder="1. &#10;2. &#10;3. "
-              className="min-h-[100px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
-                value={formData.nextSteps.join("\n")}
-                onChange={(e) =>
-                  updateField(
-                    "nextSteps",
-                    e.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean)
-                  )
-                }
-            />
+            <ol className="list-decimal space-y-2 pl-5 text-foreground">
+              {formData.nextSteps.map((step, index) => (
+                <li key={`step-${index}`}>{step}</li>
+              ))}
+            </ol>
           </ChatBubble>
 
           <ChatBubble
             icon={<Gauge className="h-5 w-5" />}
             label="Clarity Score"
-            sublabel="Rate how clear and validated this idea feels (1-10)"
+            sublabel="AI-evaluated clarity of this idea (1-10)"
             isLast
           >
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Low clarity</span>
-                <span className="text-3xl font-bold text-primary">{formData.clarityScore}</span>
-                <span className="text-sm text-muted-foreground">High clarity</span>
+              <div className="flex items-center justify-center">
+                <span className="text-3xl font-bold text-primary text-center">{formData.clarityScore}</span>
               </div>
-              <Slider
-                value={[formData.clarityScore]}
-                onValueChange={(value) => updateField("clarityScore", value[0])}
-                min={1}
-                max={10}
-                step={1}
-                className="py-2"
-              />
               <Textarea
                 placeholder="Briefly explain your clarity score rating..."
                 className="mt-3 min-h-[80px] resize-none border-0 bg-transparent p-0 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-0"
                 value={formData.clarityExplanation}
-                onChange={(e) => updateField("clarityExplanation", e.target.value)}
+                readOnly
               />
             </div>
           </ChatBubble>
-        </div>
-
-        {/* Submit button */}
-        <div className="mt-8 flex justify-end">
-          <Button
-            onClick={handleSubmit}
-            disabled={!isFormValid || isSubmitting}
-            size="lg"
-            className="gap-2 rounded-full px-8"
-          >
-            {isSubmitting ? (
-              "Submitting..."
-            ) : (
-              <>
-                Submit Validation
-                <Send className="h-4 w-4" />
-              </>
-            )}
-          </Button>
         </div>
       </div>
     </main>
